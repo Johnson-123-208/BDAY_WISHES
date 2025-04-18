@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🎁 Birthday Puzzle for Kavya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to right, #fbc2eb, #a6c1ee);
+      min-height: 100vh;
+      overflow-y: auto;
+      position: relative;
+      transition: background 0.6s ease;
+    }
+
+    .container {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+      margin: 40px auto;
+      max-width: 800px;
+    }
+
+    h1 {
+      font-family: 'Pacifico', cursive;
+      font-size: 3rem;
+      color: #fff;
+      text-shadow: 1px 1px 5px #ff69b4;
+    }
+
+    .puzzle {
+      display: flex;
+      flex-wrap: wrap;
+      max-width: 500px;
+      margin: 20px auto;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .tile {
+      width: 60px;
+      height: 60px;
+      font-size: 1.2rem;
+      border-radius: 12px;
+      background-color: #ffffff22;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      backdrop-filter: blur(4px);
+    }
+
+    .tile.revealed {
+      background-color: #ff6ec4;
+      font-weight: bold;
+      font-size: 1.5rem;
+      text-shadow: 1px 1px 4px #fff;
+    }
+
+    .balloon {
+      position: absolute;
+      width: 50px;
+      height: 70px;
+      background: radial-gradient(circle, #fff 20%, #ff6ec4 80%);
+      border-radius: 50% 50% 50% 50%;
+      animation: float 10s linear infinite;
+    }
+
+    .balloon:nth-child(2) { left: 5%; animation-delay: 1s; background: #f67280; }
+    .balloon:nth-child(3) { right: 5%; animation-delay: 2s; background: #6c5b7b; }
+    .balloon:nth-child(4) { left: 10%; animation-delay: 3s; background: #c06c84; }
+    .balloon:nth-child(5) { right: 10%; animation-delay: 4s; background: #355c7d; }
+
+    @keyframes float {
+      0% { bottom: -80px; transform: rotate(0deg); }
+      100% { bottom: 100vh; transform: rotate(360deg); }
+    }
+
+    .popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      color: #ff4081;
+      font-size: 1.4rem;
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 999;
+      animation: popUp 0.6s ease-out forwards;
+    }
+
+    @keyframes popUp {
+      0% { transform: scale(0.5) translate(-50%, -50%); opacity: 0; }
+      100% { transform: scale(1) translate(-50%, -50%); opacity: 1; }
+    }
+
+    .extra-message {
+      text-align: center;
+      color: white;
+      font-size: 1.2rem;
+      padding: 60px 20px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .tile {
+        width: 45px;
+        height: 45px;
+        font-size: 1rem;
+      }
+
+      .container {
+        padding: 20px;
+        margin: 30px 10px;
+      }
+
+      .popup {
+        font-size: 1.1rem;
+        padding: 20px;
+      }
+
+      .puzzle {
+        max-width: 90vw;
+        gap: 6px;
+      }
+
+      .balloon {
+        width: 30px;
+        height: 45px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="balloon"></div>
+  <div class="balloon"></div>
+  <div class="balloon"></div>
+  <div class="balloon"></div>
+
+  <div class="container">
+    <h1>🎉 Happy Birthday Kavya 🎂</h1>
+    <p style="color: white; font-weight: 500;">Idhi Solve Bangaram..💌<br> "?" Marks anni Aipoyaka normal vi kooda motham click chey</p>
+    <div class="puzzle" id="puzzle"></div>
+  </div>
+
+  <div class="popup" id="popup">
+    Dear Kavya,<br><br>
+    May your birthday be as special, colorful, and beautiful as you are! 💖<br>
+    Wishing you a day filled with laughter, love, surprises, and unforgettable memories. ✨<br><br>
+    Here's to you and your amazing journey ahead. Keep shining and smiling! 🌈🎁<br><br>
+    Lots of love 💝<br>
+    Enjoy every moment 💫<br>
+    <h2>🎂 Once again, Happy Birthday CHELLEMMA..!💝</h2>
+    
+  </div>
+
+  <div class="extra-message">
+    <p>May your dreams sparkle just like you do ✨</p>
+        
+  </div>
+
+  <script>
+    const message = "WISHING YOU A MAGICAL BIRTHDAY FULL OF LOVE JOY AND ENDLESS SMILES BANGARAM";
+    const puzzleContainer = document.getElementById("puzzle");
+    const popup = document.getElementById("popup");
+    const body = document.body;
+
+    const bgGradients = [
+      "linear-gradient(to right, #ff9a9e, #fad0c4)",
+      "linear-gradient(to right, #a18cd1, #fbc2eb)",
+      "linear-gradient(to right, #ffecd2, #fcb69f)",
+      "linear-gradient(to right, #ffdde1, #ee9ca7)",
+      "linear-gradient(to right, #d4fc79, #96e6a1)"
+    ];
+
+    function changeBackground() {
+      const random = Math.floor(Math.random() * bgGradients.length);
+      body.style.background = bgGradients[random];
+    }
+
+    message.split("").forEach(char => {
+      const tile = document.createElement("div");
+      tile.classList.add("tile");
+      tile.textContent = char === " " ? " " : "?";
+      tile.dataset.letter = char;
+      tile.onclick = () => {
+        if (!tile.classList.contains("revealed")) {
+          tile.classList.add("revealed");
+          tile.textContent = tile.dataset.letter;
+          changeBackground();
+          checkCompletion();
+        }
+      };
+      puzzleContainer.appendChild(tile);
+    });
+
+    function checkCompletion() {
+      const allTiles = document.querySelectorAll(".tile");
+      const revealedTiles = document.querySelectorAll(".tile.revealed");
+      if (allTiles.length === revealedTiles.length) {
+        triggerConfetti();
+        setTimeout(() => popup.style.display = "block", 800);
+      }
+    }
+
+    function triggerConfetti() {
+      confetti({
+        particleCount: 200,
+        spread: 120,
+        origin: { y: 0.6 }
+      });
+    }
+  </script>
+
+</body>
+</html>
